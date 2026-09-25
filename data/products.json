@@ -1,0 +1,50 @@
+[
+    {
+        "id": 1,
+        "name": "Brake Pad Kit",
+        "price": 1250,
+        "icon": "\ud83e\uddf0"
+    },
+    {
+        "id": 2,
+        "name": "Chain Set",
+        "price": 2450,
+        "icon": "\ud83d\udd27"
+    },
+    {
+        "id": 3,
+        "name": "Motorcycle Tire",
+        "price": 3600,
+        "icon": "\ud83d\udede"
+    },
+    {
+        "id": 4,
+        "name": "Battery",
+        "price": 2980,
+        "icon": "\ud83d\udd0b"
+    },
+    {
+        "id": 5,
+        "name": "LED Lights",
+        "price": 1690,
+        "icon": "\ud83d\udca1"
+    },
+    {
+        "id": 6,
+        "name": "Safety Helmet",
+        "price": 1990,
+        "icon": "\ud83e\udde2"
+    },
+    {
+        "id": 1790319473,
+        "name": "Spark Plug",
+        "price": 950,
+        "icon": "\u26a1"
+    },
+    {
+        "id": 1790319645,
+        "name": "bold",
+        "price": 696969,
+        "icon": "\ud83e\uddf0"
+    }
+]
