@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/db.php';
 
 function get_users_file_path(): string
 {
@@ -53,68 +54,243 @@ function save_json(string $filePath, array $data): bool
     return (bool) file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 }
 
+function db_rows_to_array(PDOStatement $statement): array
+{
+    $rows = $statement->fetchAll();
+    return is_array($rows) ? $rows : [];
+}
+
 function load_users(): array
 {
-    $file = get_users_file_path();
-
-    if (!file_exists($file)) {
+    $pdo = get_db_connection();
+    if (!$pdo) {
         return [];
     }
 
-    $content = file_get_contents($file);
-    $users = json_decode($content, true);
-
-    return is_array($users) ? $users : [];
+    try {
+        $statement = $pdo->query('SELECT * FROM users ORDER BY id ASC');
+        return db_rows_to_array($statement);
+    } catch (Throwable $exception) {
+        return [];
+    }
 }
 
 function save_users(array $users): bool
 {
-    $dir = dirname(get_users_file_path());
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return false;
     }
 
-    return (bool) file_put_contents(get_users_file_path(), json_encode($users, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    try {
+        $pdo->exec('DELETE FROM users');
+
+        $insert = $pdo->prepare(
+            'INSERT INTO users (id, name, email, password, role, verified, verification_photo, created_at) VALUES (:id, :name, :email, :password, :role, :verified, :verification_photo, :created_at)'
+        );
+
+        foreach ($users as $user) {
+            $insert->execute([
+                ':id' => (int) ($user['id'] ?? 0),
+                ':name' => (string) ($user['name'] ?? ''),
+                ':email' => strtolower((string) ($user['email'] ?? '')),
+                ':password' => (string) ($user['password'] ?? ''),
+                ':role' => (string) (($user['role'] ?? 'user')),
+                ':verified' => ((bool) ($user['verified'] ?? false)) ? 1 : 0,
+                ':verification_photo' => $user['verification_photo'] ?? null,
+                ':created_at' => (string) ($user['created_at'] ?? date('Y-m-d H:i:s')),
+            ]);
+        }
+
+        return true;
+    } catch (Throwable $exception) {
+        return false;
+    }
 }
 
 function load_products(): array
 {
-    return load_json(get_products_file_path(), []);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return [];
+    }
+
+    try {
+        $statement = $pdo->query('SELECT * FROM products ORDER BY id ASC');
+        return db_rows_to_array($statement);
+    } catch (Throwable $exception) {
+        return [];
+    }
 }
 
 function save_products(array $products): bool
 {
-    return save_json(get_products_file_path(), $products);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return false;
+    }
+
+    try {
+        $pdo->exec('DELETE FROM products');
+        $insert = $pdo->prepare('INSERT INTO products (id, name, price, icon) VALUES (:id, :name, :price, :icon)');
+
+        foreach ($products as $product) {
+            $insert->execute([
+                ':id' => (int) ($product['id'] ?? 0),
+                ':name' => (string) ($product['name'] ?? ''),
+                ':price' => (float) ($product['price'] ?? 0),
+                ':icon' => (string) (($product['icon'] ?? '🧰')),
+            ]);
+        }
+
+        return true;
+    } catch (Throwable $exception) {
+        return false;
+    }
 }
 
 function load_motorcycles(): array
 {
-    return load_json(get_motorcycles_file_path(), []);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return [];
+    }
+
+    try {
+        $statement = $pdo->query('SELECT * FROM motorcycles ORDER BY id ASC');
+        return db_rows_to_array($statement);
+    } catch (Throwable $exception) {
+        return [];
+    }
 }
 
 function save_motorcycles(array $motorcycles): bool
 {
-    return save_json(get_motorcycles_file_path(), $motorcycles);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return false;
+    }
+
+    try {
+        $pdo->exec('DELETE FROM motorcycles');
+        $insert = $pdo->prepare('INSERT INTO motorcycles (id, name, brand, daily_rate, status, icon) VALUES (:id, :name, :brand, :daily_rate, :status, :icon)');
+
+        foreach ($motorcycles as $motorcycle) {
+            $insert->execute([
+                ':id' => (int) ($motorcycle['id'] ?? 0),
+                ':name' => (string) ($motorcycle['name'] ?? ''),
+                ':brand' => (string) ($motorcycle['brand'] ?? ''),
+                ':daily_rate' => (float) ($motorcycle['daily_rate'] ?? 0),
+                ':status' => (string) (($motorcycle['status'] ?? 'available')),
+                ':icon' => (string) (($motorcycle['icon'] ?? '🏍️')),
+            ]);
+        }
+
+        return true;
+    } catch (Throwable $exception) {
+        return false;
+    }
 }
 
 function load_reservations(): array
 {
-    return load_json(get_reservations_file_path(), []);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return [];
+    }
+
+    try {
+        $statement = $pdo->query('SELECT * FROM reservations ORDER BY id ASC');
+        return db_rows_to_array($statement);
+    } catch (Throwable $exception) {
+        return [];
+    }
 }
 
 function save_reservations(array $reservations): bool
 {
-    return save_json(get_reservations_file_path(), $reservations);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return false;
+    }
+
+    try {
+        $pdo->exec('DELETE FROM reservations');
+        $insert = $pdo->prepare(
+            'INSERT INTO reservations (id, user_email, motorcycle, start_date, end_date, renter_name, renter_phone, renter_address, status, created_at) VALUES (:id, :user_email, :motorcycle, :start_date, :end_date, :renter_name, :renter_phone, :renter_address, :status, :created_at)'
+        );
+
+        foreach ($reservations as $reservation) {
+            $insert->execute([
+                ':id' => (int) ($reservation['id'] ?? 0),
+                ':user_email' => (string) ($reservation['user_email'] ?? ''),
+                ':motorcycle' => (string) ($reservation['motorcycle'] ?? ''),
+                ':start_date' => (string) ($reservation['start_date'] ?? ''),
+                ':end_date' => (string) ($reservation['end_date'] ?? ''),
+                ':renter_name' => (string) ($reservation['renter_name'] ?? ''),
+                ':renter_phone' => (string) ($reservation['renter_phone'] ?? ''),
+                ':renter_address' => (string) ($reservation['renter_address'] ?? ''),
+                ':status' => (string) (($reservation['status'] ?? 'Pending')),
+                ':created_at' => (string) ($reservation['created_at'] ?? date('Y-m-d H:i:s')),
+            ]);
+        }
+
+        return true;
+    } catch (Throwable $exception) {
+        return false;
+    }
 }
 
 function load_orders(): array
 {
-    return load_json(get_orders_file_path(), []);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return [];
+    }
+
+    try {
+        $statement = $pdo->query('SELECT * FROM orders ORDER BY id ASC');
+        $orders = db_rows_to_array($statement);
+
+        foreach ($orders as &$order) {
+            if (!empty($order['items']) && is_string($order['items'])) {
+                $decoded = json_decode($order['items'], true);
+                $order['items'] = is_array($decoded) ? $decoded : [];
+            }
+        }
+        unset($order);
+
+        return $orders;
+    } catch (Throwable $exception) {
+        return [];
+    }
 }
 
 function save_orders(array $orders): bool
 {
-    return save_json(get_orders_file_path(), $orders);
+    $pdo = get_db_connection();
+    if (!$pdo) {
+        return false;
+    }
+
+    try {
+        $pdo->exec('DELETE FROM orders');
+        $insert = $pdo->prepare('INSERT INTO orders (id, user_email, total, items, created_at) VALUES (:id, :user_email, :total, :items, :created_at)');
+
+        foreach ($orders as $order) {
+            $insert->execute([
+                ':id' => (int) ($order['id'] ?? 0),
+                ':user_email' => (string) ($order['user_email'] ?? ''),
+                ':total' => (float) ($order['total'] ?? 0),
+                ':items' => json_encode($order['items'] ?? [], JSON_UNESCAPED_SLASHES),
+                ':created_at' => (string) ($order['created_at'] ?? date('Y-m-d H:i:s')),
+            ]);
+        }
+
+        return true;
+    } catch (Throwable $exception) {
+        return false;
+    }
 }
 
 function ensure_demo_products(): void
@@ -240,6 +416,63 @@ function refresh_session_user(): void
     }
 }
 
+function migrate_json_data_to_db(): void
+{
+    $jsonPaths = [
+        'users' => __DIR__ . '/../data/users.json',
+        'products' => __DIR__ . '/../data/products.json',
+        'motorcycles' => __DIR__ . '/../data/motorcycles.json',
+        'reservations' => __DIR__ . '/../data/reservations.json',
+        'orders' => __DIR__ . '/../data/orders.json',
+    ];
+
+    foreach ($jsonPaths as $key => $path) {
+        if (!file_exists($path)) {
+            continue;
+        }
+
+        $content = @file_get_contents($path);
+        if ($content === false) {
+            continue;
+        }
+
+        $data = json_decode($content, true);
+        if (!is_array($data)) {
+            continue;
+        }
+
+        switch ($key) {
+            case 'users':
+                if (!empty($data)) {
+                    save_users($data);
+                }
+                break;
+            case 'products':
+                if (!empty($data)) {
+                    save_products($data);
+                }
+                break;
+            case 'motorcycles':
+                if (!empty($data)) {
+                    save_motorcycles($data);
+                }
+                break;
+            case 'reservations':
+                if (!empty($data)) {
+                    save_reservations($data);
+                }
+                break;
+            case 'orders':
+                if (!empty($data)) {
+                    save_orders($data);
+                }
+                break;
+        }
+    }
+}
+
+ensure_database();
+migrate_json_data_to_db();
 ensure_demo_accounts();
 ensure_demo_products();
 ensure_demo_motorcycles();

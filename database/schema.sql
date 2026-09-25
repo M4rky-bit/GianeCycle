@@ -1,0 +1,52 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role VARCHAR(50) NOT NULL DEFAULT 'user',
+    verified TINYINT(1) NOT NULL DEFAULT 0,
+    verification_photo VARCHAR(255) NULL,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS products (
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    icon VARCHAR(50) NOT NULL DEFAULT '🧰',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS motorcycles (
+    id INT NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    brand VARCHAR(255) NOT NULL,
+    daily_rate DECIMAL(10,2) NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'available',
+    icon VARCHAR(50) NOT NULL DEFAULT '🏍️',
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS reservations (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_email VARCHAR(255) NOT NULL,
+    motorcycle VARCHAR(255) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    renter_name VARCHAR(255) NOT NULL,
+    renter_phone VARCHAR(50) NOT NULL,
+    renter_address TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'Pending',
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS orders (
+    id INT NOT NULL AUTO_INCREMENT,
+    user_email VARCHAR(255) NOT NULL,
+    total DECIMAL(10,2) NOT NULL,
+    items JSON NOT NULL,
+    created_at DATETIME NOT NULL,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
