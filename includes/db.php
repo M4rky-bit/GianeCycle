@@ -35,8 +35,14 @@ function get_db_connection(): ?PDO
 
         return $pdo;
     } catch (Throwable $exception) {
+        error_log('GianeCycle DB connection failed: ' . $exception->getMessage());
         return null;
     }
+}
+
+function database_is_available(): bool
+{
+    return get_db_connection() instanceof PDO;
 }
 
 function ensure_database(): void

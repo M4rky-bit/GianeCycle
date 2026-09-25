@@ -2,56 +2,21 @@
 session_start();
 require_once __DIR__ . '/db.php';
 
-function get_users_file_path(): string
-{
-    return __DIR__ . '/../data/users.json';
-}
-
 function get_uploads_dir(): string
 {
     return __DIR__ . '/../uploads/verification';
 }
 
-function get_products_file_path(): string
+function require_database(): void
 {
-    return __DIR__ . '/../data/products.json';
-}
-
-function get_motorcycles_file_path(): string
-{
-    return __DIR__ . '/../data/motorcycles.json';
-}
-
-function get_reservations_file_path(): string
-{
-    return __DIR__ . '/../data/reservations.json';
-}
-
-function get_orders_file_path(): string
-{
-    return __DIR__ . '/../data/orders.json';
-}
-
-function load_json(string $filePath, array $default = []): array
-{
-    if (!file_exists($filePath)) {
-        return $default;
+    if (!database_is_available()) {
+        http_response_code(503);
+        echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Database unavailable</title></head><body style="font-family: Arial, sans-serif; max-width: 700px; margin: 80px auto; padding: 24px; color: #1f2937;">';
+        echo '<h1>Service unavailable</h1>';
+        echo '<p>The application could not connect to the MySQL database. Please check the database configuration and try again.</p>';
+        echo '</body></html>';
+        exit;
     }
-
-    $content = file_get_contents($filePath);
-    $data = json_decode($content, true);
-
-    return is_array($data) ? $data : $default;
-}
-
-function save_json(string $filePath, array $data): bool
-{
-    $dir = dirname($filePath);
-    if (!is_dir($dir)) {
-        mkdir($dir, 0777, true);
-    }
-
-    return (bool) file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 }
 
 function db_rows_to_array(PDOStatement $statement): array
@@ -416,63 +381,8 @@ function refresh_session_user(): void
     }
 }
 
-function migrate_json_data_to_db(): void
-{
-    $jsonPaths = [
-        'users' => __DIR__ . '/../data/users.json',
-        'products' => __DIR__ . '/../data/products.json',
-        'motorcycles' => __DIR__ . '/../data/motorcycles.json',
-        'reservations' => __DIR__ . '/../data/reservations.json',
-        'orders' => __DIR__ . '/../data/orders.json',
-    ];
-
-    foreach ($jsonPaths as $key => $path) {
-        if (!file_exists($path)) {
-            continue;
-        }
-
-        $content = @file_get_contents($path);
-        if ($content === false) {
-            continue;
-        }
-
-        $data = json_decode($content, true);
-        if (!is_array($data)) {
-            continue;
-        }
-
-        switch ($key) {
-            case 'users':
-                if (!empty($data)) {
-                    save_users($data);
-                }
-                break;
-            case 'products':
-                if (!empty($data)) {
-                    save_products($data);
-                }
-                break;
-            case 'motorcycles':
-                if (!empty($data)) {
-                    save_motorcycles($data);
-                }
-                break;
-            case 'reservations':
-                if (!empty($data)) {
-                    save_reservations($data);
-                }
-                break;
-            case 'orders':
-                if (!empty($data)) {
-                    save_orders($data);
-                }
-                break;
-        }
-    }
-}
-
+require_database();
 ensure_database();
-migrate_json_data_to_db();
 ensure_demo_accounts();
 ensure_demo_products();
 ensure_demo_motorcycles();

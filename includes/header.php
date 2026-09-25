@@ -30,7 +30,6 @@ $user = $_SESSION['user'] ?? null;
                         <a class="<?php echo $currentPage === 'profile.php' ? 'active' : ''; ?>" href="profile.php">Profile</a>
                     </div>
                     <div class="nav-actions">
-                        <span class="welcome-tag">Admin: <?php echo htmlspecialchars($user['name']); ?></span>
                         <a class="btn btn-secondary" href="logout.php">Logout</a>
                     </div>
                 <?php else: ?>
@@ -44,7 +43,6 @@ $user = $_SESSION['user'] ?? null;
                         <a class="<?php echo $currentPage === 'profile.php' ? 'active' : ''; ?>" href="profile.php">Profile</a>
                     </div>
                     <div class="nav-actions">
-                        <span class="welcome-tag">User: <?php echo htmlspecialchars($user['name']); ?></span>
                         <a class="btn btn-secondary" href="logout.php">Logout</a>
                     </div>
                 <?php endif; ?>

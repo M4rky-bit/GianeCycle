@@ -50,8 +50,6 @@ include __DIR__ . '/includes/header.php';
             </form>
 
             <div class="auth-meta">
-                <p>Demo admin: admin@gianecycle.com / admin123</p>
-                <p>Demo user: user@gianecycle.com / user123</p>
                 <p>Don’t have an account? <a href="register.php">Register here</a></p>
             </div>
         </div>
